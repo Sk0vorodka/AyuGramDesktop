@@ -36,6 +36,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/lang_instance.h"
 #include "lang/lang_keys.h"
 #include "lottie/lottie_icon.h"
+#include "menu/menu_checked_action.h"
 #include "main/main_account.h"
 #include "main/main_app_config.h"
 #include "main/main_domain.h"
@@ -113,6 +114,7 @@ public:
 private:
 	void setupChildGeometry();
 	void initViewers();
+	void updatePhoneText();
 	void refreshNameGeometry(int newWidth);
 	void refreshIdGeometry(int newWidth);
 	void refreshUsernameGeometry(int newWidth);
@@ -194,6 +196,19 @@ Cover::Cover(
 		} else {
 			_id->fillContextMenu(request);
 		}
+		const auto hidden = _user->session().settings().phoneNumberHidden();
+		const auto toggle = [=] {
+			_user->session().settings().setPhoneNumberHidden(
+				!_user->session().settings().phoneNumberHidden());
+			_user->session().saveSettingsDelayed();
+			updatePhoneText();
+		};
+		Menu::AddCheckedAction(
+			request.menu,
+			tr::lng_context_spoiler_effect(tr::now),
+			toggle,
+			&st::menuIconSpoiler,
+			hidden);
 	};
 	_id->setContextMenuHook(hook);
 
